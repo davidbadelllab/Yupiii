@@ -61,7 +61,7 @@ const FarmButton = () => {
       <div className="relative">
         <button
           onClick={handleClick}
-          className={`relative w-80 h-80 rounded-full overflow-hidden focus:outline-none 
+          className={`relative w-70 h-70 rounded-full overflow-hidden focus:outline-none 
             hover:scale-105 
             ${isCollecting ? 'scale-95' : ''} 
             transition-all duration-300 

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { CharacterProvider, useCharacter } from '../context/CharacterContext';
 import GameNavigation from '../components/GameNavigation';
 import CharacterDisplay from '../components/CharacterDisplay';
 import Loader from '../components/Loader';
 import FarmButton from '../components/FarmButton';
+import SettingsModal from '../components/SettingsModal';
 
 const GameCard = ({ title }) => {
   return (
@@ -27,22 +27,19 @@ GameCard.propTypes = {
   title: PropTypes.string.isRequired
 };
 
-const Login = () => {
+const LoginContent = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
+  const { selectedCharacter } = useCharacter();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const initTelegram = async () => {
       try {
-        // Verificar si Telegram está disponible
         if (window.Telegram && window.Telegram.WebApp) {
-          // Inicializar la WebApp
           const tg = window.Telegram.WebApp;
-
-          // Expandir la webapp a pantalla completa
           tg.expand();
 
-          // Obtener datos del usuario
           const user = tg.initDataUnsafe?.user;
           if (user) {
             setUserData({
@@ -50,12 +47,10 @@ const Login = () => {
               lastName: user.last_name,
               username: user.username,
               photoUrl: user.photo_url,
-              // Otros datos que quieras usar
             });
           }
         }
 
-        // Si estamos en el proxy del juego de Telegram
         if (window.TelegramGameProxy) {
           window.TelegramGameProxy.receiveEvent = (event) => {
             console.log('Evento recibido:', event);
@@ -64,7 +59,6 @@ const Login = () => {
       } catch (error) {
         console.error('Error inicializando Telegram:', error);
       } finally {
-        // Terminar la carga después de procesar todo
         setTimeout(() => {
           setLoading(false);
         }, 2000);
@@ -79,57 +73,74 @@ const Login = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen pb-16 relative">
-      <div className="max-w-md mx-auto p-4">
-        {/* Profile Section */}
-        <section className="mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 relative rounded-full overflow-hidden ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900">
-              <img
-                src={userData?.photoUrl || "/img/personaje.png"}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-medium">
-                {userData ? `${userData.firstName} ${userData.lastName || ''}` : 'Usuario'}
-                {userData?.username && <span className="text-gray-400 ml-2">@{userData.username}</span>}
+    <>
+      <div className="bg-gray-900 text-white min-h-screen pb-16 relative">
+        <div className="max-w-md mx-auto p-4">
+          {/* Profile Section */}
+          <section className="mb-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-8 h-8 relative rounded-full overflow-hidden ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900">
+                <img
+                  src={selectedCharacter.image}
+                  //  alt={selectedCharacter.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 w-fit mt-2">
-                <div className="flex flex-col items-center">
-                  <span className="text-white-400 text-xs">Ganancia por hora</span>
-                  <span className="text-white-400 text-lg font-medium">+107,13</span>
+              <div className="flex-1">
+                <div className="text-sm font-medium">
+                  {userData ? `${userData.firstName} ${userData.lastName || ''}` : selectedCharacter.name}
+                  {userData?.username && (
+                    <span className="text-gray-400 ml-2">@{userData.username}</span>
+                  )}
                 </div>
-                <div className="flex items-center gap-1 relative">
-                  <img src="../../public/img/moneda.png" alt="Moneda" className="w-8 h-8" />
+                <div className="flex items-center bg-gray-800 rounded-full px-6 py-2 mt-2 w-[280px]">
+                  <div className="flex flex-col items-center flex-1">
+                    <span className="text-white-400 text-lg">Ganancia por hora</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white-400 text-lg font-medium">+0</span>
+                      <img src="/img/moneda.png" alt="Moneda" className="w-8 h-8" />
+                    </div>
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="bg-transparent hover:bg-gray-800/50 rounded-full p-2 transition-colors duration-200 ml-2"
+              >
+                <i className="fa-solid fa-gear text-white text-2xl hover:text-green-500 transition-colors duration-200"></i>
+              </button>
             </div>
-            <button
-              onClick={() => {
-                // Puedes usar tg.showSettingsButton() aquí si lo necesitas
-                if (window.Telegram?.WebApp) {
-                  window.Telegram.WebApp.showSettingsButton();
-                }
-              }}
-              className="bg-transparent hover:bg-transparent hover:bg-opacity-10 rounded-full p-2 transition-colors shadow-none hover:shadow-lg"
-            >
-              <i className="fa-solid fa-gear text-white text-3xl hover:text-green-500"></i>
-            </button>
-          </div>
-        </section>
+          </section>
 
-        {/* Character Display */}
-        <CharacterDisplay />
+          {/* Character Display */}
+          <CharacterDisplay />
+        </div>
+
+        {/* Personaje farmeable */}
+        <FarmButton />
+
+        {/* Navigation */}
+        <GameNavigation />
       </div>
 
-      {/* Personaje farmeable */}
-      <FarmButton />
+      {/* Modal de configuración */}
+      {isSettingsOpen && (
+        <div className="relative z-[100]">
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+          />
+        </div>
+      )}
+    </>
+  );
+};
 
-      {/* Navigation */}
-      <GameNavigation />
-    </div>
+const Login = () => {
+  return (
+    <CharacterProvider>
+      <LoginContent />
+    </CharacterProvider>
   );
 };
 

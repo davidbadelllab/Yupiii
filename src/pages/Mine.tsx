@@ -77,8 +77,8 @@ const MinePage = () => {
     };
   
     const tabs = [
-      { id: 'mine-cards', label: 'Mis Tortugas' },
-      { id: 'new-cards', label: 'Nuevas Tortugas' },
+      { id: 'mine-cards', label: 'Mis Elements' },
+      { id: 'new-cards', label: 'Nuevos Elemnts' },
       { id: 'opportunities', label: 'Oportunidades perdidas' }
     ];
   

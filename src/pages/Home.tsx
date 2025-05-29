@@ -1,105 +1,121 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Player } from '@lottiefiles/react-lottie-player';
 import './App.css';
 
 function Home() {
-  // Datos de las imágenes con texto asociado para cada una
-  const images = [
-    { 
-      id: 'text1', 
-      src: '/img/01.jpg', 
-      text: '¡Juega, ríe, gana!', 
-      position: { 
-        bottom: '700px', 
-        left: '10px',
-        color: 'white',
-        backgroundColor: 'rgba(0,0,0,0.5)'
-      } 
+  const slides = [
+    {
+      id: 'slide1',
+      animation: '/img/animate1.json',
+      title: '¡Bienvenido a Battle Elements!',
+      description: 'Un emocionante juego crypto donde cada batalla cuenta. Combina elementos, forma estrategias y gana recompensas reales mientras te diviertes.',
+      color: 'text-yellow-400'
     },
-    { 
-      id: 'text2', 
-      src: '/img/02.jpg', 
-      text: '¿Te atreves a jugar?', 
-      position: { 
-        bottom: '770px', 
-        left: '10px',
-        color: 'white',
-        backgroundColor: 'rgba(0,0,0,0.5)'
-      } 
+    {
+      id: 'slide2',
+      animation: '/img/animate2.json',
+      title: 'Farmea y Gana',
+      description: 'Completa misiones diarias, participa en eventos especiales y acumula tokens. Cada acción te acerca más a increíbles recompensas.',
+      color: 'text-blue-400'
     },
-    { 
-      id: 'text3', 
-      src: '/img/03.jpg', 
-      text: '¡Entra al juego!', 
-      position: { 
-        bottom: '425px',  
-        left: '200px',
-        color: 'white',
-        backgroundColor: 'rgba(0,0,0,0.5)'
-      } 
-    },
-    { 
-      id: 'text4', 
-      src: '/img/04.jpg', 
-      text: 'Listos, ¡a jugar!', 
-      position: { 
-        bottom: '365px',  
-        left: '120px',
-        color: 'white',
-        backgroundColor: 'rgba(0,0,0,0.5)'
-      } 
+    {
+      id: 'slide3',
+      animation: '/img/animate3.json',
+      title: 'Únete a la Aventura',
+      description: 'Forma parte de una comunidad apasionada, comercia elementos únicos en el marketplace y construye tu imperio en Battle Elements.',
+      color: 'text-green-400'
     }
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verificación y carga previa de las imágenes
-    images.forEach((image, index) => {
-      const img = new Image();
-      img.onload = () => console.log(`Image ${index + 1} loaded successfully`);
-      img.onerror = () => console.error(`Error loading image ${index + 1}: ${image.src}`);
-      img.src = image.src;
-    });
+    // Simular tiempo de carga
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   }, []);
 
   const handleNext = () => {
-    if (currentIndex === images.length - 1) {
-      navigate('./Login'); // Navegar a login al llegar a la última imagen
+    if (currentIndex === slides.length - 1) {
+      navigate('/login');
     } else {
-      setCurrentIndex(currentIndex + 1); // Cambiar a la siguiente imagen
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
-  const currentImage = images[currentIndex];
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-900">
+        <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-white text-xl">Loading...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="mobile-view">
-      <img 
-        src={currentImage.src} 
-        alt={`Imagen ${currentIndex + 1}`} 
-        className="carousel-image" 
-      />
+    <div className="relative h-screen bg-gray-900 overflow-hidden">
       <div 
-        id={currentImage.id}
-        style={{
-          position: 'absolute',
-          ...currentImage.position,
-          padding: '10px',
-          borderRadius: '8px',
-          fontSize: '24px',
-          zIndex: 10
-        }}
+        className="flex transition-transform duration-500 ease-in-out h-full"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
-        {currentImage.text}
+        {slides.map((slide, index) => (
+          <div 
+            key={slide.id}
+            className="min-w-full h-full flex flex-col items-center justify-center px-6"
+          >
+            <div className="w-64 h-64 mb-8">
+              <Player
+                autoplay
+                loop
+                src={slide.animation}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+            <h2 className={`text-2xl font-bold mb-4 ${slide.color}`}>
+              {slide.title}
+            </h2>
+            <p className="text-white text-center mb-8">
+              {slide.description}
+            </p>
+          </div>
+        ))}
       </div>
-      <button 
-        onClick={handleNext} 
-        className="next-button"
-      >
-        Siguiente
-      </button>
+
+      <div className="absolute bottom-10 left-0 right-0 flex justify-center items-center gap-4">
+        <button
+          onClick={handlePrevious}
+          disabled={currentIndex === 0}
+          className="px-6 py-2 bg-yellow-400 text-gray-900 rounded-full disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        <div className="flex gap-2">
+          {slides.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full ${
+                currentIndex === index ? 'bg-yellow-400' : 'bg-gray-600'
+              }`}
+            />
+          ))}
+        </div>
+        <button
+          onClick={handleNext}
+          className="px-6 py-2 bg-yellow-400 text-gray-900 rounded-full"
+        >
+          {currentIndex === slides.length - 1 ? 'Comenzar' : 'Siguiente'}
+        </button>
+      </div>
     </div>
   );
 }

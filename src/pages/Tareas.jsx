@@ -144,7 +144,7 @@ const Tareas = () => {
 
         {/* YouTube Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3">Hamster Youtube</h2>
+          <h2 className="text-lg font-semibold mb-3">Elemnts Youtube</h2>
           {youtubeTasks.map((task, index) => (
             <YouTubeTask key={index} {...task} />
           ))}
